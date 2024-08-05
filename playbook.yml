@@ -1,0 +1,79 @@
+---
+- name: Deploy Node.js Express Application
+  hosts: server1
+  become: yes
+  # gather_facts: no
+  vars:
+    app_dir: /var/www/node_test/
+    node_version: '20.x'
+    app_repo: git@github.com:SadiqOnGithub/node_hello_world_api.git
+    # git_clone_dir: /home/{{ ansible_user }}/node_clone/ # make sure to end dir with '/'
+    index_file: index.js
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install Node.js and npm
+      apt:
+        name:
+          - nodejs
+          - npm
+        state: latest
+
+    - name: Ensure app directory exists
+      file:
+        path: '{{ app_dir }}'
+        state: directory
+        owner: '{{ ansible_user }}'
+        group: '{{ ansible_user }}'
+        mode: '0755'
+
+    - name: Clone/pull the application repository
+      tags: clone
+      git:
+        repo: '{{ app_repo }}'
+        # dest: '{{ git_clone_dir }}'
+        dest: '{{ app_dir }}'
+        version: main
+        force: yes
+        accept_hostkey: yes
+      become: no
+
+    # - name: Copy application files
+    #   copy:
+    #     src: '{{ git_clone_dir }}'
+    #     dest: '{{ app_dir }}'
+    #     owner: '{{ ansible_user }}'
+    #     group: '{{ ansible_user }}'
+    #     mode: 0755
+    #     remote_src: true # or it will search the controller node instead of managed node
+
+    - name: Install application dependencies
+      community.general.npm:
+        path: '{{ app_dir }}'
+
+    - name: Install PM2 globally
+      community.general.npm:
+        name: pm2
+        global: yes
+
+    - name: Start the application with PM2
+      tags: pm2
+      command: pm2 -f start {{ index_file }} --name myapp --watch
+      args:
+        chdir: '{{ app_dir }}'
+      # ignore_errors: yes
+
+    - name: Ensure PM2 starts on boot
+      tags: pm2
+      command: pm2 startup systemd
+      args:
+        creates: /etc/systemd/system/pm2-root.service
+
+    - name: Save PM2 process list
+      tags: pm2
+      command: pm2 save
+      args:
+        creates: /root/.pm2/dump.pm2
