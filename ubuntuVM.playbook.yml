@@ -4,9 +4,9 @@
   become: yes
   # gather_facts: no
   vars:
-    app_dir: /var/www/node_test/
+    app_dir: /var/www/hbms-backend/
     node_version: '20.x'
-    app_repo: git@github.com:SadiqOnGithub/node_hello_world_api.git
+    app_repo: burhaniprojects@vs-ssh.visualstudio.com:v3/burhaniprojects/HussainBikesMechShop/hbms-backend
     # git_clone_dir: /home/{{ ansible_user }}/node_clone/ # make sure to end dir with '/'
     index_file: index.js
 
@@ -15,12 +15,12 @@
       apt:
         update_cache: yes
 
-    - name: Install Node.js and npm
-      apt:
-        name:
-          - nodejs
-          - npm
-        state: latest
+    # - name: Install Node.js and npm
+    #   apt:
+    #     name:
+    #       - nodejs
+    #       - npm
+    #     state: latest
 
     - name: Ensure app directory exists
       file:

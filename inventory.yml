@@ -1,14 +1,14 @@
 all:
   vars:
-    ansible_user: ansible
-    ansible_password: pass
+    ansible_user: legendaryappuser
+    ansible_password: adminpass@LCF1234$
     ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
 
 web_servers:
   hosts:
     server1:
-      ansible_host: 192.168.1.100
-      ansible_port: 2221
+      ansible_host: 20.235.192.53
+      ansible_port: 22
     server2:
       ansible_host: 192.168.1.100
       ansible_port: 2222
